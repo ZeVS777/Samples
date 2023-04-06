@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zevs.Samples.Rsa", "Zevs.Samples.Rsa\Zevs.Samples.Rsa.csproj", "{A87F61C4-CC01-4108-9522-C314888161E3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{744ED781-6892-4DEF-8BE5-17CD5EA4AA59}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A87F61C4-CC01-4108-9522-C314888161E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A87F61C4-CC01-4108-9522-C314888161E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A87F61C4-CC01-4108-9522-C314888161E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A87F61C4-CC01-4108-9522-C314888161E3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {72E6890B-A32A-433C-94C7-6392BC6A4415}
+	EndGlobalSection
+EndGlobal
