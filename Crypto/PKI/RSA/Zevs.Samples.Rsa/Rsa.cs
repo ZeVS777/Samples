@@ -1,4 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
+п»їusing System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -146,7 +146,7 @@ public class Rsa
         SecurityAlgorithms.RsaSsaPssSha384 => HashAlgorithmName.SHA384,
         SecurityAlgorithms.RsaSha512 => HashAlgorithmName.SHA512,
         SecurityAlgorithms.RsaSsaPssSha512 => HashAlgorithmName.SHA512,
-        _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известный алгоритм")
+        _ => throw new ArgumentOutOfRangeException(nameof(alg), "РќРµ РёР·РІРµСЃС‚РЅС‹Р№ Р°Р»РіРѕСЂРёС‚Рј")
     };
 
     private static RSASignaturePadding GetPadding(string alg) => alg switch
@@ -157,7 +157,7 @@ public class Rsa
         SecurityAlgorithms.RsaSsaPssSha384 => RSASignaturePadding.Pss,
         SecurityAlgorithms.RsaSha512 => RSASignaturePadding.Pkcs1,
         SecurityAlgorithms.RsaSsaPssSha512 => RSASignaturePadding.Pss,
-        _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известный алгоритм")
+        _ => throw new ArgumentOutOfRangeException(nameof(alg), "РќРµ РёР·РІРµСЃС‚РЅС‹Р№ Р°Р»РіРѕСЂРёС‚Рј")
     };
 
     private static string GetPrivateJwk(string alg = SecurityAlgorithms.RsaSha256)
@@ -169,9 +169,9 @@ public class Rsa
         {
             Kty = nameof(RSA),
             Alg = alg,
-            //Если ключ будет использоваться только для подписи
+            //Р•СЃР»Рё РєР»СЋС‡ Р±СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ С‚РѕР»СЊРєРѕ РґР»СЏ РїРѕРґРїРёСЃРё
             //Use = "sig",
-            //Если ключ будет использоваться только для шифрования
+            //Р•СЃР»Рё РєР»СЋС‡ Р±СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ С‚РѕР»СЊРєРѕ РґР»СЏ С€РёС„СЂРѕРІР°РЅРёСЏ
             //Use = "enc",
             N = Base64UrlEncoder.Encode(rsaParameters.Modulus),
             E = Base64UrlEncoder.Encode(rsaParameters.Exponent),
@@ -197,9 +197,9 @@ public class Rsa
         {
             Kty = nameof(RSA),
             Alg = alg,
-            //Если ключ будет использоваться только для подписи
+            //Р•СЃР»Рё РєР»СЋС‡ Р±СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ С‚РѕР»СЊРєРѕ РґР»СЏ РїРѕРґРїРёСЃРё
             //Use = "sig",
-            //Если ключ будет использоваться только для шифрования
+            //Р•СЃР»Рё РєР»СЋС‡ Р±СѓРґРµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ С‚РѕР»СЊРєРѕ РґР»СЏ С€РёС„СЂРѕРІР°РЅРёСЏ
             //Use = "enc",
             N = Base64UrlEncoder.Encode(rsaParameters.Modulus),
             E = Base64UrlEncoder.Encode(rsaParameters.Exponent)
@@ -212,7 +212,7 @@ public class Rsa
     {
         var json = JsonExtensions.SerializeToJson(jwk);
 
-        //jwk уже готов, но для простоты чтения человеком, давайте отформатируем
+        //jwk СѓР¶Рµ РіРѕС‚РѕРІ, РЅРѕ РґР»СЏ РїСЂРѕСЃС‚РѕС‚С‹ С‡С‚РµРЅРёСЏ С‡РµР»РѕРІРµРєРѕРј, РґР°РІР°Р№С‚Рµ РѕС‚С„РѕСЂРјР°С‚РёСЂСѓРµРј
         var obj = JsonSerializer.Deserialize<object>(json);
         var formatted = JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
 
@@ -223,7 +223,7 @@ public class Rsa
     {
         Modulus = Base64UrlEncoder.DecodeBytes(jwk.N),
         Exponent = Base64UrlEncoder.DecodeBytes(jwk.E),
-        //Приватные параметры
+        //РџСЂРёРІР°С‚РЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
         D = string.IsNullOrEmpty(jwk.D) ? null : Base64UrlEncoder.DecodeBytes(jwk.D),
         P = string.IsNullOrEmpty(jwk.P) ? null : Base64UrlEncoder.DecodeBytes(jwk.P),
         Q = string.IsNullOrEmpty(jwk.Q) ? null : Base64UrlEncoder.DecodeBytes(jwk.Q),
