@@ -7,10 +7,16 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Zevs.Samples.Rsa;
 
+/// <summary>
+/// Примеры загрузки и использования RSA
+/// </summary>
 public class Rsa
 {
-    private readonly byte[] _data = Encoding.UTF8.GetBytes("Cryptography is cool!");
+    private readonly byte[] _data = Encoding.UTF8.GetBytes("Криптография - круто!");
 
+    /// <summary>
+    /// Загрузка RSA из файлов приватного и публичного ключа (PEM)
+    /// </summary>
     [Fact]
     public void LoadFromPem()
     {
@@ -24,6 +30,9 @@ public class Rsa
         EncryptingVerify(rsaPublic, rsaPrivate);
     }
 
+    /// <summary>
+    /// Загрузка RSA из X.509 (pem)
+    /// </summary>
     [Fact]
     public void LoadFromCertPem()
     {
@@ -39,6 +48,9 @@ public class Rsa
         EncryptingVerify(rsaPublic, rsaPrivate);
     }
 
+    /// <summary>
+    /// Загрузка RSA из X.509 (pfx)
+    /// </summary>
     [Fact]
     public void LoadFromCertPfx()
     {
@@ -54,6 +66,9 @@ public class Rsa
         EncryptingVerify(rsaPublic, rsaPrivate);
     }
 
+    /// <summary>
+    /// Загрузка RSA из JWK (HS256)
+    /// </summary>
     [Fact]
     public void LoadFromJwk()
     {
@@ -77,6 +92,9 @@ public class Rsa
         EncryptingVerify(rsaPublic, rsaPrivate);
     }
 
+    /// <summary>
+    /// Загрузка RSA из JWK (PS256)
+    /// </summary>
     [Fact]
     public void LoadPssFromJwk()
     {
@@ -100,6 +118,9 @@ public class Rsa
         EncryptingVerify(rsaPublic, rsaPrivate);
     }
 
+    /// <summary>
+    /// Загрузка из эфемерного сертификата
+    /// </summary>
     [Fact]
     public void LoadEphemeralX509()
     {
@@ -121,6 +142,29 @@ public class Rsa
         EncryptingVerify(rsaPublic, rsaPrivate);
     }
 
+    /// <summary>
+    /// Использование CryptoProviderFactory для создания подписи и её проверки
+    /// </summary>
+    [Fact]
+    public void UsingCryptoProviderFactory()
+    {
+        const string alg = SecurityAlgorithms.RsaSsaPssSha256;
+
+        using var rsa = RSA.Create(3072);
+
+        var signer = CryptoProviderFactory.Default.CreateForSigning(new RsaSecurityKey(rsa), alg);
+        var verifier = CryptoProviderFactory.Default.CreateForVerifying(new RsaSecurityKey(rsa), alg);
+
+        var signature = signer.Sign(_data);
+        Assert.True(verifier.Verify(_data, signature));
+    }
+
+    /// <summary>
+    /// Подпись данных и её проверка
+    /// </summary>
+    /// <param name="rsaPublic">Публичный ключ, которым производится проверка подписи</param>
+    /// <param name="rsaPrivate">Приватный ключ, которым подписываются данные</param>
+    /// <param name="alg">Алгоритм, выбранный для проведения процедуры подписывания</param>
     private void SignVerify(RSA rsaPublic, RSA rsaPrivate, string alg = SecurityAlgorithms.RsaSha256)
     {
         var padding = GetPadding(alg);
@@ -131,6 +175,11 @@ public class Rsa
         Assert.True(result);
     }
 
+    /// <summary>
+    /// Шифрование и расшифровка данных
+    /// </summary>
+    /// <param name="rsaPublic">Публичный ключ, которым производится шифрование</param>
+    /// <param name="rsaPrivate">Приватный ключ, которым производится расшифровка</param>
     private void EncryptingVerify(RSA rsaPublic, RSA rsaPrivate)
     {
         var encryptedData = rsaPublic.Encrypt(_data, RSAEncryptionPadding.Pkcs1);
