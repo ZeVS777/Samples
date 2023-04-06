@@ -63,7 +63,7 @@ public class Rsa
         var publicJwkJson = GetPublicJwk();
         var publicJwk = new JsonWebKey(publicJwkJson);
 
-        Assert.Equal(publicJwk.Kty, nameof(RSA));
+        Assert.Equal(nameof(RSA), publicJwk.Kty);
         Assert.Equal(publicJwk.Kty, privateJwk.Kty);
         Assert.Equal(publicJwk.Alg, privateJwk.Alg);
 
@@ -86,7 +86,7 @@ public class Rsa
         var publicJwkJson = GetPublicJwk(SecurityAlgorithms.RsaSsaPssSha256);
         var publicJwk = new JsonWebKey(publicJwkJson);
 
-        Assert.Equal(publicJwk.Kty, nameof(RSA));
+        Assert.Equal(nameof(RSA), publicJwk.Kty);
         Assert.Equal(publicJwk.Kty, privateJwk.Kty);
         Assert.Equal(publicJwk.Alg, privateJwk.Alg);
 
