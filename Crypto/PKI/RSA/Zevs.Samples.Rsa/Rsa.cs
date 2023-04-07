@@ -214,6 +214,10 @@ public class Rsa
         using var rsaPrivate = RSA.Create();
         rsaPrivate.ImportFromPem(File.ReadAllText("CertFiles/private-key.pem"));
         var rsaParameters = rsaPrivate.ExportParameters(true);
+
+        if (alg != SecurityAlgorithms.RsaSha256 && alg != SecurityAlgorithms.RsaSsaPssSha256) 
+            throw new ArgumentException("Приватный ключ в PEM файле подготовлен для RSA 256 bit", nameof(alg));
+
         var jwk = new JsonWebKey
         {
             Kty = nameof(RSA),
@@ -237,10 +241,9 @@ public class Rsa
 
     private static string GetPublicJwk(string alg = SecurityAlgorithms.RsaSha256)
     {
-        using var rsaPrivate = RSA.Create();
-        rsaPrivate.ImportFromPem(File.ReadAllText("CertFiles/public-key.pem"));
-
-        var rsaParameters = rsaPrivate.ExportParameters(false);
+        using var rsaPublic = RSA.Create();
+        rsaPublic.ImportFromPem(File.ReadAllText("CertFiles/public-key.pem"));
+        var rsaParameters = rsaPublic.ExportParameters(false);
 
         var jwk = new JsonWebKey
         {
