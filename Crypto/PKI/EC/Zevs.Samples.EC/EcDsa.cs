@@ -151,7 +151,6 @@ public class EcDsa
         return GetFormattedJwk(jwk);
     }
 
-
     private static string GetPublicJwk()
     {
         using var ecPublic = ECDsa.Create();
@@ -217,7 +216,6 @@ public class EcDsa
         SecurityAlgorithms.EcdsaSha256 => HashAlgorithmName.SHA256,
         SecurityAlgorithms.EcdsaSha384 => HashAlgorithmName.SHA384,
         SecurityAlgorithms.EcdsaSha512 => HashAlgorithmName.SHA512,
-        "ES256K" => HashAlgorithmName.SHA256,
         _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известный алгоритм")
     };
 
