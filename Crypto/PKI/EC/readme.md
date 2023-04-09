@@ -46,3 +46,17 @@ openssl pkcs12 -export -out cert.pfx -inkey private-key.pem -in cert.pem
 ## Использование CryptoProviderFactory для создания подписи и её проверки
 
 **Microsoft.IdentityModel.Tokens** предлагает удобный инстрмент для проведения процедуры подтверждения валидности подписи
+
+## Загрузка вышеперечисленными способами криптографии на основе secP256k1 (ES256K)
+
+Создание приватного ключа:
+
+```bash
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:secp256k1 -out private-key.secP256k1.pem
+```
+
+*Остальные файлы подготовлены теми же командами, добавляя перед расширением secP256k1, например *.secP256k1.pem**
+
+## Использование CustomCryptoProvider для создания подписи и её проверки на основе secP256k1 (ES256K)
+
+Для поддержки secP256k1 (ES256K) реализованы самописные классы: см. CustomCryptoProvider.cs
