@@ -3,10 +3,15 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Zevs.Samples.EC;
 
+/// <summary>
+/// Самописный провайдер криптографических функций для поддержки дополнительных алгоритмов
+/// </summary>
 public class CustomCryptoProvider : ICryptoProvider
 {
+    /// <inheritdoc />
     public bool IsSupportedAlgorithm(string algorithm, params object[] args) => algorithm == "ES256K";
 
+    /// <inheritdoc />
     public object Create(string algorithm, params object[] args)
     {
         if (algorithm != "ES256K" || args[0] is not CustomEcDsaSecurityKey key)
@@ -15,6 +20,7 @@ public class CustomCryptoProvider : ICryptoProvider
         return new CustomSignatureProvider(key, algorithm);
     }
 
+    /// <inheritdoc />
     public void Release(object cryptoInstance)
     {
         if (cryptoInstance is IDisposable disposableObject)
@@ -22,32 +28,31 @@ public class CustomCryptoProvider : ICryptoProvider
     }
 }
 
-public class CustomEcDsaSecurityKey : AsymmetricSecurityKey
+/// <summary>
+/// Самописный ключ безопасности с поддержкой <see cref="CustomCryptoProvider"/>
+/// </summary>
+public class CustomEcDsaSecurityKey : ECDsaSecurityKey
 {
-    public ECParameters EcParameters { get; }
-
-    public override int KeySize => throw new NotImplementedException();
-
-    [Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus instead.")]
-    public override bool HasPrivateKey => EcParameters.D is not null;
-
-    public override PrivateKeyStatus PrivateKeyStatus =>
-        EcParameters.D is not null ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
-
-    public CustomEcDsaSecurityKey(ECParameters ecParameters)
-    {
-        if (ecParameters.Curve.Oid.FriendlyName != "secP256k1")
-            throw new NotSupportedException();
-
-        EcParameters = ecParameters;
-        CryptoProviderFactory.CustomCryptoProvider = new CustomCryptoProvider();
-    }
+    /// <summary>
+    /// Создать новый экземпляр <see cref="CustomEcDsaSecurityKey" />.
+    /// </summary>
+    /// <param name="ecdsa"><see cref="T:System.Security.Cryptography.ECDsa" /></param>
+    public CustomEcDsaSecurityKey(ECDsa ecdsa) : base(ecdsa) => CryptoProviderFactory.CustomCryptoProvider = new CustomCryptoProvider();
 }
 
+/// <summary>
+/// Самописный провайдер функций создания подписей и её проверки с поддержкой дополнительных алгоритмов
+/// </summary>
 public class CustomSignatureProvider : SignatureProvider
 {
     private readonly CustomEcDsaSecurityKey _securityKey;
 
+    /// <summary>
+    /// Создать новый экземпляр <see cref="CustomSignatureProvider"/>
+    /// </summary>
+    /// <param name="key">Ключ безопасности</param>
+    /// <param name="algorithm">Алгоритм, используемый при создании и проверке подписи</param>
+    /// <exception cref="NotSupportedException">Алгоритм или ключ не поддерживаются</exception>
     public CustomSignatureProvider(SecurityKey key, string algorithm) : base(key, algorithm)
     {
         if (algorithm != "ES256K" || key is not CustomEcDsaSecurityKey securityKey)
@@ -60,15 +65,19 @@ public class CustomSignatureProvider : SignatureProvider
     {
     }
 
-    public override byte[] Sign(byte[] input)
-    {
-        using var ecDsa = ECDsa.Create(_securityKey.EcParameters);
-        return ecDsa.SignData(input, HashAlgorithmName.SHA256);
-    }
+    /// <summary>
+    /// Создаёт подпись 'input' используя <see cref="CustomEcDsaSecurityKey" /> и алгоритм, заданный в <see cref="CustomSignatureProvider(SecurityKey,string)" />.
+    /// </summary>
+    /// <param name="input">Байты, которые требуется подписать.</param>
+    /// <returns>Подпись input.</returns>
+    public override byte[] Sign(byte[] input) => _securityKey.ECDsa.SignData(input, HashAlgorithmName.SHA256);
 
-    public override bool Verify(byte[] input, byte[] signature)
-    {
-        using var ecDsa = ECDsa.Create(_securityKey.EcParameters);
-        return ecDsa.VerifyData(input, signature, HashAlgorithmName.SHA256);
-    }
+    /// <summary>
+    /// Подтверждает, что подпись <paramref name="signature"/> входных данных <paramref name="input"/>, использующая
+    /// <see cref="SecurityKey"/> и <see cref="SignatureProvider.Algorithm"/>, описанных в
+    /// <see cref="SignatureProvider"/>, согласованы.
+    /// </summary>
+    /// <param name="input">Байты, которые требуется подписать.</param>
+    /// <param name="signature">Подпись, которую требуется проверить.</param>
+    public override bool Verify(byte[] input, byte[] signature) => _securityKey.ECDsa.VerifyData(input, signature, HashAlgorithmName.SHA256);
 }

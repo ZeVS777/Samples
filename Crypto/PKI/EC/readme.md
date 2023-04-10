@@ -1,8 +1,8 @@
 # Загрузка ECDSA ключей в .NET
 
-Существуют нескоолько методов загрузка ECDSA ключей и создание соответсвующих крипто объектов в .NET:
+Существуют несколько методов загрузка ECDSA ключей и создание соответствующих криптографических объектов в .NET. Здесь можно найти примеры использоования следующих алгоритмов: ES256, ES384, ES512, ES256K (secP256k1 Kobliz curve)
 
-## Загрузка ECDSA из файлов приватного и публичного ключа (PEM)
+## Загрузка ECDsa из файлов приватного и публичного PEM ключа (ES256, ES256K)
 
 Создание приватного ключа:
 
@@ -10,7 +10,13 @@
 openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out private-key.pem
 ```
 
-*ec_paramgen_curve - тип эллиптическоой кривой (openssl ecparam -list_curves)*
+*ec_paramgen_curve - тип эллиптической кривой (openssl ecparam -list_curves)*
+
+Создание приватного ключа для secp256k1:
+
+```bash
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:secp256k1 -out private-key.secP256k1.pem
+```
 
 Создание публичного ключа:
 
@@ -18,7 +24,7 @@ openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out private-key.
 openssl pkey -in private-key.pem -pubout -out public-key.pem
 ```
 
-## Загрузка ECDSA из X.509 (pem, pfx)
+## Загрузка ECDsa из X.509 pem и pfx файлов (ES256, ES256K)
 
 Создание самоподписанного сертификата:
 
@@ -33,30 +39,17 @@ openssl pkcs12 -export -out cert.pfx -inkey private-key.pem -in cert.pem
 ```
 
 
-## Загрузка ECDSA из JWK (ES256)
+## Загрузка ECDsa из JWK (ES256, ES256K)
 
 Показан пример, как можно сгенерировать JWK и как из него получить ECDSA. Показаны два различных алгоритма
 
 
-## Загрузка из эфемерного сертификата
+## Загрузка из эфемерного сертификата (ES256, ES384, ES512, ES256K)
 
-Создаём самоподписанного сертификата на лету и фоормирование приватного и пбличного ключей
+Создаём самоподписанного сертификата на лету и формирование приватного и публичного ключей
 
 
-## Использование CryptoProviderFactory для создания подписи и её проверки
+## Использование CryptoProviderFactory для создания подписи и её проверки (ES256, ES384, ES512, ES256K)
 
-**Microsoft.IdentityModel.Tokens** предлагает удобный инстрмент для проведения процедуры подтверждения валидности подписи
-
-## Загрузка вышеперечисленными способами криптографии на основе secP256k1 (ES256K)
-
-Создание приватного ключа:
-
-```bash
-openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:secp256k1 -out private-key.secP256k1.pem
-```
-
-*Остальные файлы подготовлены теми же командами, добавляя перед расширением secP256k1, например *.secP256k1.pem**
-
-## Использование CustomCryptoProvider для создания подписи и её проверки на основе secP256k1 (ES256K)
-
-Для поддержки secP256k1 (ES256K) реализованы самописные классы: см. CustomCryptoProvider.cs
+**Microsoft.IdentityModel.Tokens** предлагает удобный инстрмент для проведения процедуры подтверждения валидности подписи.
+Однако он поддерживает ограниченный [набор алгоритмов](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Supported-Algorithms), среди которых нет ES256K. Для поддержки алгоритмов, не поддерживаемых стандартными инструментами, можно их расширить: см. CustomCryptoProvider.cs.
