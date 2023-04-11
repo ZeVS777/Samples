@@ -53,20 +53,14 @@ public class CustomSignatureProvider : SignatureProvider
     /// <param name="key">Ключ безопасности</param>
     /// <param name="algorithm">Алгоритм, используемый при создании и проверке подписи</param>
     /// <exception cref="NotSupportedException">Алгоритм или ключ не поддерживаются</exception>
-    public CustomSignatureProvider(SecurityKey key, string algorithm) : base(key, algorithm)
-    {
-        if (algorithm != "ES256K" || key is not CustomEcDsaSecurityKey securityKey)
-            throw new NotSupportedException();
-
-        _securityKey = securityKey;
-    }
+    public CustomSignatureProvider(CustomEcDsaSecurityKey key, string algorithm) : base(key, algorithm) => _securityKey = key;
 
     protected override void Dispose(bool disposing)
     {
     }
 
     /// <summary>
-    /// Создаёт подпись 'input' используя <see cref="CustomEcDsaSecurityKey" /> и алгоритм, заданный в <see cref="CustomSignatureProvider(SecurityKey,string)" />.
+    /// Создаёт подпись 'input' используя <see cref="CustomEcDsaSecurityKey" /> и алгоритм, заданный в <see cref="CustomSignatureProvider(CustomEcDsaSecurityKey,string)" />.
     /// </summary>
     /// <param name="input">Байты, которые требуется подписать.</param>
     /// <returns>Подпись input.</returns>
