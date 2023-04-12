@@ -39,7 +39,8 @@ public class Rsa
         { AlgorithmUsing.Signing, SecurityAlgorithms.RsaSsaPssSha384 },
         { AlgorithmUsing.Signing, SecurityAlgorithms.RsaSsaPssSha512 },
         { AlgorithmUsing.Encryption, SecurityAlgorithms.RsaPKCS1 },
-        { AlgorithmUsing.Encryption, SecurityAlgorithms.RsaOAEP }
+        { AlgorithmUsing.Encryption, SecurityAlgorithms.RsaOAEP },
+        { AlgorithmUsing.Encryption, "RSA-OAEP-256" }
     };
 
     /// <summary>
@@ -170,7 +171,7 @@ public class Rsa
     public void UsingCryptoProviderFactory(AlgorithmUsing algorithmUsing, string alg)
     {
         using var rsa = RSA.Create(3072);
-        var key = new RsaSecurityKey(rsa);
+        var key = alg == "RSA-OAEP-256" ? new CustomRsaSecurityKey(rsa) : new RsaSecurityKey(rsa);
 
         if (algorithmUsing == AlgorithmUsing.Signing)
         {
@@ -244,7 +245,8 @@ public class Rsa
 
     private static RSAEncryptionPadding GetEncryptionPadding(string alg) => alg switch
     {
-        SecurityAlgorithms.RsaOAEP => RSAEncryptionPadding.OaepSHA256,
+        SecurityAlgorithms.RsaOAEP => RSAEncryptionPadding.OaepSHA1,
+        "RSA-OAEP-256" => RSAEncryptionPadding.OaepSHA256,
         SecurityAlgorithms.RsaPKCS1 => RSAEncryptionPadding.Pkcs1,
         _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известный алгоритм")
     };
