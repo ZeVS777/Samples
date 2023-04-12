@@ -15,10 +15,39 @@ public class Rsa
     private readonly byte[] _data = Encoding.UTF8.GetBytes("Криптография - круто!");
 
     /// <summary>
+    /// Использование алгоритма
+    /// </summary>
+    public enum AlgorithmUsing
+    {
+        /// <summary>
+        /// Подпись
+        /// </summary>
+        Signing,
+
+        /// <summary>
+        /// Шифрование
+        /// </summary>
+        Encryption
+    }
+
+    public static TheoryData<AlgorithmUsing, string> RsaAlgorithms = new()
+    {
+        { AlgorithmUsing.Signing, SecurityAlgorithms.RsaSha256 },
+        { AlgorithmUsing.Signing, SecurityAlgorithms.RsaSha384 },
+        { AlgorithmUsing.Signing, SecurityAlgorithms.RsaSha512 },
+        { AlgorithmUsing.Signing, SecurityAlgorithms.RsaSsaPssSha256 },
+        { AlgorithmUsing.Signing, SecurityAlgorithms.RsaSsaPssSha384 },
+        { AlgorithmUsing.Signing, SecurityAlgorithms.RsaSsaPssSha512 },
+        { AlgorithmUsing.Encryption, SecurityAlgorithms.RsaPKCS1 },
+        { AlgorithmUsing.Encryption, SecurityAlgorithms.RsaOAEP }
+    };
+
+    /// <summary>
     /// Загрузка RSA из файлов приватного и публичного ключа (PEM)
     /// </summary>
-    [Fact]
-    public void LoadFromPem()
+    [Theory]
+    [MemberData(nameof(RsaAlgorithms))]
+    public void LoadFromPem(AlgorithmUsing algorithmUsing, string alg)
     {
         using var rsaPrivate = RSA.Create();
         rsaPrivate.ImportFromPem(File.ReadAllText("CertFiles/private-key.pem"));
@@ -26,15 +55,18 @@ public class Rsa
         using var rsaPublic = RSA.Create();
         rsaPublic.ImportFromPem(File.ReadAllText("CertFiles/public-key.pem"));
 
-        SignVerify(rsaPublic, rsaPrivate);
-        EncryptingVerify(rsaPublic, rsaPrivate);
+        if (algorithmUsing == AlgorithmUsing.Signing)
+            SignVerify(rsaPublic, rsaPrivate, alg);
+        else
+            EncryptingVerify(rsaPublic, rsaPrivate, alg);
     }
 
     /// <summary>
     /// Загрузка RSA из X.509 (pem)
     /// </summary>
-    [Fact]
-    public void LoadFromCertPem()
+    [Theory]
+    [MemberData(nameof(RsaAlgorithms))]
+    public void LoadFromCertPem(AlgorithmUsing algorithmUsing, string alg)
     {
         using var rsaPrivate = RSA.Create();
         rsaPrivate.ImportFromPem(File.ReadAllText("CertFiles/private-key.pem"));
@@ -44,15 +76,18 @@ public class Rsa
 
         Assert.NotNull(rsaPublic);
 
-        SignVerify(rsaPublic, rsaPrivate);
-        EncryptingVerify(rsaPublic, rsaPrivate);
+        if (algorithmUsing == AlgorithmUsing.Signing)
+            SignVerify(rsaPublic, rsaPrivate, alg);
+        else
+            EncryptingVerify(rsaPublic, rsaPrivate, alg);
     }
 
     /// <summary>
     /// Загрузка RSA из X.509 (pfx)
     /// </summary>
-    [Fact]
-    public void LoadFromCertPfx()
+    [Theory]
+    [MemberData(nameof(RsaAlgorithms))]
+    public void LoadFromCertPfx(AlgorithmUsing algorithmUsing, string alg)
     {
         var pfx = X509Certificate.CreateFromCertFile("CertFiles/cert.pfx");
         var cert = new X509Certificate2(pfx);
@@ -62,25 +97,29 @@ public class Rsa
         Assert.NotNull(rsaPublic);
         Assert.NotNull(rsaPrivate);
 
-        SignVerify(rsaPublic, rsaPrivate);
-        EncryptingVerify(rsaPublic, rsaPrivate);
+        if (algorithmUsing == AlgorithmUsing.Signing)
+            SignVerify(rsaPublic, rsaPrivate, alg);
+        else
+            EncryptingVerify(rsaPublic, rsaPrivate, alg);
     }
 
     /// <summary>
-    /// Загрузка RSA из JWK (HS256)
+    /// Загрузка RSA из JWK
     /// </summary>
-    [Fact]
-    public void LoadFromJwk()
+    [Theory]
+    [MemberData(nameof(RsaAlgorithms))]
+    public void LoadFromJwk(AlgorithmUsing algorithmUsing, string alg)
     {
-        var privateJwkJson = GetPrivateJwk();
+        var privateJwkJson = GetPrivateJwk(algorithmUsing, alg);
         var privateJwk = new JsonWebKey(privateJwkJson);
 
-        var publicJwkJson = GetPublicJwk();
+        var publicJwkJson = GetPublicJwk(algorithmUsing, alg);
         var publicJwk = new JsonWebKey(publicJwkJson);
 
         Assert.Equal(nameof(RSA), publicJwk.Kty);
         Assert.Equal(publicJwk.Kty, privateJwk.Kty);
         Assert.Equal(publicJwk.Alg, privateJwk.Alg);
+        Assert.Equal(publicJwk.Use, privateJwk.Use);
 
         var privateParameters = GetFromJwk(privateJwk);
         using var rsaPrivate = RSA.Create(privateParameters);
@@ -88,48 +127,27 @@ public class Rsa
         var publicParameters = GetFromJwk(publicJwk);
         using var rsaPublic = RSA.Create(publicParameters);
 
-        SignVerify(rsaPublic, rsaPrivate, privateJwk.Alg);
-        EncryptingVerify(rsaPublic, rsaPrivate);
-    }
-
-    /// <summary>
-    /// Загрузка RSA из JWK (PS256)
-    /// </summary>
-    [Fact]
-    public void LoadPssFromJwk()
-    {
-        var privateJwkJson = GetPrivateJwk(SecurityAlgorithms.RsaSsaPssSha256);
-        var privateJwk = new JsonWebKey(privateJwkJson);
-
-        var publicJwkJson = GetPublicJwk(SecurityAlgorithms.RsaSsaPssSha256);
-        var publicJwk = new JsonWebKey(publicJwkJson);
-
-        Assert.Equal(nameof(RSA), publicJwk.Kty);
-        Assert.Equal(publicJwk.Kty, privateJwk.Kty);
-        Assert.Equal(publicJwk.Alg, privateJwk.Alg);
-
-        var privateParameters = GetFromJwk(privateJwk);
-        using var rsaPrivate = RSA.Create(privateParameters);
-
-        var publicParameters = GetFromJwk(publicJwk);
-        using var rsaPublic = RSA.Create(publicParameters);
-
-        SignVerify(rsaPublic, rsaPrivate, privateJwk.Alg);
-        EncryptingVerify(rsaPublic, rsaPrivate);
+        if (publicJwk.Use == "sig")
+            SignVerify(rsaPublic, rsaPrivate, publicJwk.Alg);
+        else
+            EncryptingVerify(rsaPublic, rsaPrivate, publicJwk.Alg);
     }
 
     /// <summary>
     /// Загрузка из эфемерного сертификата
     /// </summary>
-    [Fact]
-    public void LoadEphemeralX509()
+    [Theory]
+    [MemberData(nameof(RsaAlgorithms))]
+    public void LoadEphemeralX509(AlgorithmUsing algorithmUsing, string alg)
     {
-        const string alg = SecurityAlgorithms.RsaSha384;
-        var padding = GetPadding(alg);
-        var hashingAlg = GetHashingFunc(alg);
+        var padding = algorithmUsing == AlgorithmUsing.Signing ? GetSignaturePadding(alg) : RSASignaturePadding.Pkcs1;
+        var hashingAlg = algorithmUsing == AlgorithmUsing.Signing ? GetHashingFunc(alg) : HashAlgorithmName.SHA256;
 
         using var rsa = RSA.Create(3072);
         var req = new CertificateRequest("C=RU, CN=ZeVS", rsa, hashingAlg, padding);
+        req.CertificateExtensions.Add(new X509KeyUsageExtension(
+            algorithmUsing == AlgorithmUsing.Signing ? X509KeyUsageFlags.DigitalSignature : X509KeyUsageFlags.KeyEncipherment,
+            critical: true));
         var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddMinutes(1));
 
         var rsaPrivate = cert.GetRSAPrivateKey();
@@ -138,25 +156,38 @@ public class Rsa
         Assert.NotNull(rsaPublic);
         Assert.NotNull(rsaPrivate);
 
-        SignVerify(rsaPublic, rsaPrivate, alg);
-        EncryptingVerify(rsaPublic, rsaPrivate);
+        if (algorithmUsing == AlgorithmUsing.Signing)
+            SignVerify(rsaPublic, rsaPrivate, alg);
+        else
+            EncryptingVerify(rsaPublic, rsaPrivate, alg);
     }
 
     /// <summary>
     /// Использование CryptoProviderFactory для создания подписи и её проверки
     /// </summary>
-    [Fact]
-    public void UsingCryptoProviderFactory()
+    [Theory]
+    [MemberData(nameof(RsaAlgorithms))]
+    public void UsingCryptoProviderFactory(AlgorithmUsing algorithmUsing, string alg)
     {
-        const string alg = SecurityAlgorithms.RsaSsaPssSha256;
-
         using var rsa = RSA.Create(3072);
+        var key = new RsaSecurityKey(rsa);
 
-        var signer = CryptoProviderFactory.Default.CreateForSigning(new RsaSecurityKey(rsa), alg);
-        var verifier = CryptoProviderFactory.Default.CreateForVerifying(new RsaSecurityKey(rsa), alg);
+        if (algorithmUsing == AlgorithmUsing.Signing)
+        {
+            var cryptoProviderFactory = key.CryptoProviderFactory;
+            var signer = cryptoProviderFactory.CreateForSigning(key, alg);
+            var verifier = cryptoProviderFactory.CreateForVerifying(key, alg);
+            var signature = signer.Sign(_data);
+            Assert.True(verifier.Verify(_data, signature));
+        }
+        else
+        {
+            var enc = key.CryptoProviderFactory.CreateKeyWrapProvider(key, alg);
+            var encrypted = enc.WrapKey(_data);
+            var decrypted = enc.UnwrapKey(encrypted);
 
-        var signature = signer.Sign(_data);
-        Assert.True(verifier.Verify(_data, signature));
+            Assert.Equal(_data, decrypted);
+        }
     }
 
     /// <summary>
@@ -165,9 +196,9 @@ public class Rsa
     /// <param name="rsaPublic">Публичный ключ, которым производится проверка подписи</param>
     /// <param name="rsaPrivate">Приватный ключ, которым подписываются данные</param>
     /// <param name="alg">Алгоритм, выбранный для проведения процедуры подписывания</param>
-    private void SignVerify(RSA rsaPublic, RSA rsaPrivate, string alg = SecurityAlgorithms.RsaSha256)
+    private void SignVerify(RSA rsaPublic, RSA rsaPrivate, string alg)
     {
-        var padding = GetPadding(alg);
+        var padding = GetSignaturePadding(alg);
         var hashingAlg = GetHashingFunc(alg);
 
         var signature = rsaPrivate.SignData(_data, hashingAlg, padding);
@@ -180,10 +211,12 @@ public class Rsa
     /// </summary>
     /// <param name="rsaPublic">Публичный ключ, которым производится шифрование</param>
     /// <param name="rsaPrivate">Приватный ключ, которым производится расшифровка</param>
-    private void EncryptingVerify(RSA rsaPublic, RSA rsaPrivate)
+    /// <param name="alg">Алгоритм шифрования</param>
+    private void EncryptingVerify(RSA rsaPublic, RSA rsaPrivate, string alg)
     {
-        var encryptedData = rsaPublic.Encrypt(_data, RSAEncryptionPadding.Pkcs1);
-        var decrypted = rsaPrivate.Decrypt(encryptedData, RSAEncryptionPadding.Pkcs1);
+        var padding = GetEncryptionPadding(alg);
+        var encryptedData = rsaPublic.Encrypt(_data, padding);
+        var decrypted = rsaPrivate.Decrypt(encryptedData, padding);
         Assert.Equal(decrypted, _data);
     }
 
@@ -198,7 +231,7 @@ public class Rsa
         _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известный алгоритм")
     };
 
-    private static RSASignaturePadding GetPadding(string alg) => alg switch
+    private static RSASignaturePadding GetSignaturePadding(string alg) => alg switch
     {
         SecurityAlgorithms.RsaSha256 => RSASignaturePadding.Pkcs1,
         SecurityAlgorithms.RsaSsaPssSha256 => RSASignaturePadding.Pss,
@@ -209,23 +242,24 @@ public class Rsa
         _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известный алгоритм")
     };
 
-    private static string GetPrivateJwk(string alg = SecurityAlgorithms.RsaSha256)
+    private static RSAEncryptionPadding GetEncryptionPadding(string alg) => alg switch
+    {
+        SecurityAlgorithms.RsaOAEP => RSAEncryptionPadding.OaepSHA256,
+        SecurityAlgorithms.RsaPKCS1 => RSAEncryptionPadding.Pkcs1,
+        _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известный алгоритм")
+    };
+
+    private static string GetPrivateJwk(AlgorithmUsing algorithmUsing, string alg)
     {
         using var rsaPrivate = RSA.Create();
         rsaPrivate.ImportFromPem(File.ReadAllText("CertFiles/private-key.pem"));
         var rsaParameters = rsaPrivate.ExportParameters(true);
 
-        if (alg != SecurityAlgorithms.RsaSha256 && alg != SecurityAlgorithms.RsaSsaPssSha256) 
-            throw new ArgumentException("Приватный ключ в PEM файле подготовлен для RSA 256 bit", nameof(alg));
-
         var jwk = new JsonWebKey
         {
             Kty = nameof(RSA),
             Alg = alg,
-            //Если ключ будет использоваться только для подписи
-            //Use = "sig",
-            //Если ключ будет использоваться только для шифрования
-            //Use = "enc",
+            Use = algorithmUsing == AlgorithmUsing.Signing ? "sig" : "enc",
             N = Base64UrlEncoder.Encode(rsaParameters.Modulus),
             E = Base64UrlEncoder.Encode(rsaParameters.Exponent),
             D = Base64UrlEncoder.Encode(rsaParameters.D),
@@ -239,7 +273,7 @@ public class Rsa
         return GetFormattedJwk(jwk);
     }
 
-    private static string GetPublicJwk(string alg = SecurityAlgorithms.RsaSha256)
+    private static string GetPublicJwk(AlgorithmUsing algorithmUsing, string alg)
     {
         using var rsaPublic = RSA.Create();
         rsaPublic.ImportFromPem(File.ReadAllText("CertFiles/public-key.pem"));
@@ -249,10 +283,7 @@ public class Rsa
         {
             Kty = nameof(RSA),
             Alg = alg,
-            //Если ключ будет использоваться только для подписи
-            //Use = "sig",
-            //Если ключ будет использоваться только для шифрования
-            //Use = "enc",
+            Use = algorithmUsing == AlgorithmUsing.Signing ? "sig" : "enc",
             N = Base64UrlEncoder.Encode(rsaParameters.Modulus),
             E = Base64UrlEncoder.Encode(rsaParameters.Exponent)
         };
