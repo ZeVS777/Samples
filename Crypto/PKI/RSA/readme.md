@@ -46,4 +46,5 @@ openssl pkcs12 -export -out cert.pfx -inkey private-key.pem -in cert.pem
 
 ## Использование CryptoProviderFactory для создания подписи и её проверки
 
-**Microsoft.IdentityModel.Tokens** предлагает удобный инструмент для проведения алгоритмами RSA процедуры подтверждения валидности подписи и шифрования ключа (Key Wraping).
+**Microsoft.IdentityModel.Tokens** предлагает удобный инструмент для проведения алгоритмами RSA процедуры подтверждения валидности подписи и шифрования ключа (Key Wraping). 
+Однако он поддерживает ограниченный [набор алгоритмов](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Supported-Algorithms), среди которых нет RSA-OAEP-256. Для поддержки алгоритмов, не поддерживаемых стандартными инструментами, можно расширить механизм: см. CustomCryptoProvider.cs.
