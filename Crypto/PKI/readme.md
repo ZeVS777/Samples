@@ -7,14 +7,14 @@
  - ES512 - ECDSA, использующая SHA-512 функцию предварительного хэширования и и ключ, созданнй на эллиптической кривой P-521. Этот алгоритм описан в [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-9).
  
 ### Эллиптические кривые, которые используют данные алгоритмы:
- - P-256 - NIST кривая описанная в [DSS FIPS PUB 186-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf).
+ - P-256 - secp256r1 NIST кривая описанная в [DSS FIPS PUB 186-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf).
  - SECP256K1 - SEC кривая описанная в [SEC 2: Recommended Elliptic Curve Domain Parameters](https://www.secg.org/sec2-v2.pdf).
- - P-384 - NIST кривая описанная в [DSS FIPS PUB 186-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf).
- - P-521 - NIST кривая описанная в [DSS FIPS PUB 186-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf).
+ - P-384 - secp384r1 NIST кривая описанная в [DSS FIPS PUB 186-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf).
+ - P-521 - secp521r1 NIST кривая описанная в [DSS FIPS PUB 186-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf).
  
  ### Примеры
  
- Примеры загрузки и использования алгоритмов, основанных на эллиптических кривых, можно найти [тут](EC)
+Примеры загрузки и использования алгоритмов, основанных на эллиптических кривых, можно найти [тут](EC)
  
 ## RSA алгоритмы
 
@@ -33,4 +33,4 @@
 
  ### Примеры
  
- Примеры загрузки и использования алгоритмов, основанных на RSA, можно найти [тут](RSA)
+Примеры загрузки и использования алгоритмов, основанных на RSA, можно найти [тут](RSA)
