@@ -30,3 +30,7 @@
  - RS256 - RSASSA-PKCS-v1_5 с хэш функцией SHA-256, описанное в [RFC8017](https://www.rfc-editor.org/rfc/rfc8017#page-35) и в [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-8).
  - RS384 - RSASSA-PKCS-v1_5 с хэш функцией SHA-384.
  - RS512 - RSASSA-PKCS-v1_5 с хэш функцией SHA-512.
+
+ ### Примеры
+ 
+ Примеры загрузки и использования алгоритмов, основанных на RSA, можно найти [тут](RSA/readme.md)
