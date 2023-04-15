@@ -23,14 +23,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="CertFiles\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="CertFiles\cert.pem">
+    <None Update="CertFiles\cert.P-256.pem">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CertFiles\cert.pfx">
+    <None Update="CertFiles\cert.P-256.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CertFiles\cert.P-384.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CertFiles\cert.P-384.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CertFiles\cert.P-521.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CertFiles\cert.P-521.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="CertFiles\cert.secp256k1.pem">
@@ -39,13 +47,28 @@
     <None Update="CertFiles\cert.secp256k1.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CertFiles\private-key.pem">
+    <None Update="CertFiles\private-key.P-256.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CertFiles\private-key.P-384.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CertFiles\private-key.P-512.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CertFiles\private-key.P-521.pem">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="CertFiles\private-key.secp256k1.pem">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="CertFiles\public-key.pem">
+    <None Update="CertFiles\public-key.P-256.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CertFiles\public-key.P-384.pem">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="CertFiles\public-key.P-521.pem">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="CertFiles\public-key.secp256k1.pem">

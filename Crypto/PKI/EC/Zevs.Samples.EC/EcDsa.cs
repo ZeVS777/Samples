@@ -12,12 +12,6 @@ namespace Zevs.Samples.EC;
 /// </summary>
 public class EcDsa
 {
-    public static TheoryData<string, string> Algorithms = new()
-    {
-        { "", SecurityAlgorithms.EcdsaSha256 },
-        { ".secp256k1", "ES256K" }
-    };
-
     public static TheoryData<string> EcAlgorithms = new()
     {
         SecurityAlgorithms.EcdsaSha256,
@@ -32,14 +26,16 @@ public class EcDsa
     /// Загрузка ECDsa из файлов приватного и публичного PEM ключа (ES256, ES256K)
     /// </summary>
     [Theory]
-    [MemberData(nameof(Algorithms))]
-    public void LoadFromPem(string fileSuffix, string alg)
+    [MemberData(nameof(EcAlgorithms))]
+    public void LoadFromPem(string alg)
     {
+        var crv = GetCrv(alg);
+
         using var ecPrivate = ECDsa.Create();
-        ecPrivate.ImportFromPem(File.ReadAllText($"CertFiles/private-key{fileSuffix}.pem"));
+        ecPrivate.ImportFromPem(File.ReadAllText($"CertFiles/private-key.{crv}.pem"));
 
         using var ecPublic = ECDsa.Create();
-        ecPublic.ImportFromPem(File.ReadAllText($"CertFiles/public-key{fileSuffix}.pem"));
+        ecPublic.ImportFromPem(File.ReadAllText($"CertFiles/public-key.{crv}.pem"));
 
         SignVerify(ecPublic, ecPrivate, alg);
     }
@@ -48,13 +44,15 @@ public class EcDsa
     /// Загрузка ECDsa из X.509 pem файла (ES256, ES256K)
     /// </summary>
     [Theory]
-    [MemberData(nameof(Algorithms))]
-    public void LoadFromCertPem(string fileSuffix, string alg)
+    [MemberData(nameof(EcAlgorithms))]
+    public void LoadFromCertPem(string alg)
     {
-        using var ecPrivate = ECDsa.Create();
-        ecPrivate.ImportFromPem(File.ReadAllText($"CertFiles/private-key{fileSuffix}.pem"));
+        var crv = GetCrv(alg);
 
-        var cert = X509Certificate2.CreateFromPem(File.ReadAllText($"CertFiles/cert{fileSuffix}.pem"));
+        using var ecPrivate = ECDsa.Create();
+        ecPrivate.ImportFromPem(File.ReadAllText($"CertFiles/private-key.{crv}.pem"));
+
+        var cert = X509Certificate2.CreateFromPem(File.ReadAllText($"CertFiles/cert.{crv}.pem"));
         using var ecPublic = cert.GetECDsaPublicKey();
 
         Assert.NotNull(ecPublic);
@@ -66,10 +64,12 @@ public class EcDsa
     /// Загрузка ECDsa из X.509 pfx файла (ES256, ES256K)
     /// </summary>
     [Theory]
-    [MemberData(nameof(Algorithms))]
-    public void LoadFromCertPfx(string fileSuffix, string alg)
+    [MemberData(nameof(EcAlgorithms))]
+    public void LoadFromCertPfx(string alg)
     {
-        var pfx = X509Certificate.CreateFromCertFile($"CertFiles/cert{fileSuffix}.pfx");
+        var crv = GetCrv(alg);
+
+        var pfx = X509Certificate.CreateFromCertFile($"CertFiles/cert.{crv}.pfx");
         var cert = new X509Certificate2(pfx);
 
         using var ecPrivate = cert.GetECDsaPrivateKey();
@@ -84,13 +84,13 @@ public class EcDsa
     /// Загрузка ECDsa из JWK (ES256, ES256K)
     /// </summary>
     [Theory]
-    [MemberData(nameof(Algorithms))]
-    public void LoadFromJwk(string fileSuffix, string alg)
+    [MemberData(nameof(EcAlgorithms))]
+    public void LoadFromJwk(string alg)
     {
-        var privateJwkJson = GetPrivateJwk(fileSuffix, alg);
+        var privateJwkJson = GetPrivateJwk(alg);
         var privateJwk = new JsonWebKey(privateJwkJson);
 
-        var publicJwkJson = GetPublicJwk(fileSuffix, alg);
+        var publicJwkJson = GetPublicJwk(alg);
         var publicJwk = new JsonWebKey(publicJwkJson);
 
         Assert.Equal("EC", publicJwk.Kty);
@@ -98,14 +98,10 @@ public class EcDsa
         Assert.Equal(publicJwk.Alg, privateJwk.Alg);
 
         var privateParameters = GetFromJwk(privateJwk);
-        if (!string.IsNullOrEmpty(privateJwk.Crv))
-            Assert.Equal(privateParameters.Curve.Oid.FriendlyName, GetCurve(privateJwk.Crv).Oid.FriendlyName);
 
         using var ecPrivate = ECDsa.Create(privateParameters);
 
         var publicParameters = GetFromJwk(publicJwk);
-        if (!string.IsNullOrEmpty(publicJwk.Crv))
-            Assert.Equal(privateParameters.Curve.Oid.FriendlyName, GetCurve(publicJwk.Crv).Oid.FriendlyName);
 
         using var ecPublic = ECDsa.Create(publicParameters);
 
@@ -119,9 +115,10 @@ public class EcDsa
     [MemberData(nameof(EcAlgorithms))]
     public void LoadEphemeralX509(string alg)
     {
-        var (curve, hashingAlg) = GetAlgCurveHash(alg);
+        var crv = GetCrv(alg);
+        var hashingAlg = GetHash(alg);
 
-        using var ecDsa = ECDsa.Create(curve);
+        using var ecDsa = ECDsa.Create(GetCurve(crv));
         var req = new CertificateRequest("C=RU, CN=ZeVS", ecDsa, hashingAlg);
         var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddMinutes(1));
 
@@ -141,9 +138,9 @@ public class EcDsa
     [MemberData(nameof(EcAlgorithms))]
     public void UsingCryptoProviderFactory(string alg)
     {
-        var (curve, _) = GetAlgCurveHash(alg);
+        var crv = GetCrv(alg);
 
-        using var ecDsa = ECDsa.Create(curve);
+        using var ecDsa = ECDsa.Create(GetCurve(crv));
 
         SecurityKey key = alg == "ES256K" ? new CustomEcDsaSecurityKey(ecDsa) : new ECDsaSecurityKey(ecDsa);
 
@@ -154,21 +151,20 @@ public class EcDsa
         Assert.True(verifier.Verify(_data, signature));
     }
 
-    private static string GetPrivateJwk(string fileSuffix, string alg)
+    private static string GetPrivateJwk(string alg)
     {
+        var crv = GetCrv(alg);
+
         using var ecPrivate = ECDsa.Create();
-        ecPrivate.ImportFromPem(File.ReadAllText($"CertFiles/private-key{fileSuffix}.pem"));
+        ecPrivate.ImportFromPem(File.ReadAllText($"CertFiles/private-key.{crv}.pem"));
         var ecParameters = ecPrivate.ExportParameters(true);
 
         var jwk = new JsonWebKey
         {
             Kty = "EC",
             Alg = alg,
-            Crv = GetCrv(ecParameters.Curve),
-            //Если ключ будет использоваться только для подписи
-            //Use = "sig",
-            //Если ключ будет использоваться только для шифрования
-            //Use = "enc",
+            Crv = crv,
+            Use = "sig",
             D = Base64UrlEncoder.Encode(ecParameters.D),
             X = Base64UrlEncoder.Encode(ecParameters.Q.X),
             Y = Base64UrlEncoder.Encode(ecParameters.Q.Y)
@@ -177,21 +173,20 @@ public class EcDsa
         return GetFormattedJwk(jwk);
     }
 
-    private static string GetPublicJwk(string fileSuffix, string alg)
+    private static string GetPublicJwk(string alg)
     {
+        var crv = GetCrv(alg);
+
         using var ecPublic = ECDsa.Create();
-        ecPublic.ImportFromPem(File.ReadAllText($"CertFiles/public-key{fileSuffix}.pem"));
+        ecPublic.ImportFromPem(File.ReadAllText($"CertFiles/public-key.{crv}.pem"));
         var ecParameters = ecPublic.ExportParameters(false);
 
         var jwk = new JsonWebKey
         {
             Kty = "EC",
             Alg = alg,
-            Crv = GetCrv(ecParameters.Curve),
-            //Если ключ будет использоваться только для подписи
-            //Use = "sig",
-            //Если ключ будет использоваться только для шифрования
-            //Use = "enc",
+            Crv = crv,
+            Use = "sig",
             X = Base64UrlEncoder.Encode(ecParameters.Q.X),
             Y = Base64UrlEncoder.Encode(ecParameters.Q.Y)
         };
@@ -199,17 +194,24 @@ public class EcDsa
         return GetFormattedJwk(jwk);
     }
 
-    private static ECParameters GetFromJwk(JsonWebKey jwk) => new()
+    private static ECParameters GetFromJwk(JsonWebKey jwk)
     {
-        Curve = GetAlgCurveHash(jwk.Alg).Curve,
-        Q = new ECPoint
+        var crv = GetCrv(jwk.Alg);
+        if (!string.IsNullOrEmpty(jwk.Crv)) 
+            Assert.Equal(jwk.Crv, crv);
+
+        return new ECParameters
         {
-            X = string.IsNullOrEmpty(jwk.X) ? null : Base64UrlEncoder.DecodeBytes(jwk.X),
-            Y = string.IsNullOrEmpty(jwk.Y) ? null : Base64UrlEncoder.DecodeBytes(jwk.Y),
-        },
-        //Приватные параметры
-        D = string.IsNullOrEmpty(jwk.D) ? null : Base64UrlEncoder.DecodeBytes(jwk.D)
-    };
+            Curve = GetCurve(crv),
+            Q = new ECPoint
+            {
+                X = string.IsNullOrEmpty(jwk.X) ? null : Base64UrlEncoder.DecodeBytes(jwk.X),
+                Y = string.IsNullOrEmpty(jwk.Y) ? null : Base64UrlEncoder.DecodeBytes(jwk.Y),
+            },
+            //Приватные параметры
+            D = string.IsNullOrEmpty(jwk.D) ? null : Base64UrlEncoder.DecodeBytes(jwk.D)
+        };
+    }
 
     private static string GetFormattedJwk(JsonWebKey jwk)
     {
@@ -228,11 +230,12 @@ public class EcDsa
     /// <param name="ecPublic">Публичный ключ, которым производится проверка подписи</param>
     /// <param name="ecPrivate">Приватный ключ, которым подписываются данные</param>
     /// <param name="alg">Алгоритм, выбранный для проведения процедуры подписывания</param>
-    private void SignVerify(ECDsa ecPublic, ECDsa ecPrivate, string alg = SecurityAlgorithms.EcdsaSha256)
+    private void SignVerify(ECDsa ecPublic, ECDsa ecPrivate, string alg)
     {
-        var (curve, hashingAlg) = GetAlgCurveHash(alg);
+        var crv = GetCrv(alg);
+        var hashingAlg = GetHash(alg);
 
-        Assert.Equal(curve.Oid.FriendlyName, ecPrivate.ExportParameters(false).Curve.Oid.FriendlyName);
+        Assert.Equal(crv, GetCrv(ecPrivate.ExportParameters(false).Curve));
 
         var signature = ecPrivate.SignData(_data, hashingAlg);
         var result = ecPublic.VerifyData(_data, signature, hashingAlg);
@@ -248,6 +251,15 @@ public class EcDsa
         _ => throw new ArgumentOutOfRangeException(nameof(curve), "Не известная кривая")
     };
 
+    private static string GetCrv(string alg) => alg switch
+    {
+        SecurityAlgorithms.EcdsaSha256 => "P-256",
+        "ES256K" => "secp256k1",
+        SecurityAlgorithms.EcdsaSha384 => "P-384",
+        SecurityAlgorithms.EcdsaSha512 => "P-521",
+        _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известный алгоритм")
+    };
+
     private static ECCurve GetCurve(string crv) => crv switch
     {
         "P-256" => ECCurve.NamedCurves.nistP256,
@@ -257,12 +269,12 @@ public class EcDsa
         _ => throw new ArgumentOutOfRangeException(nameof(crv), "Не известная кривая")
     };
 
-    private static (ECCurve Curve, HashAlgorithmName HashAlgorithmName) GetAlgCurveHash(string alg) => alg switch
+    private static HashAlgorithmName GetHash(string alg) => alg switch
     {
-        SecurityAlgorithms.EcdsaSha256 => (ECCurve.NamedCurves.nistP256, HashAlgorithmName.SHA256),
-        "ES256K" => (ECCurve.CreateFromFriendlyName("secP256k1"), HashAlgorithmName.SHA256),
-        SecurityAlgorithms.EcdsaSha384 => (ECCurve.NamedCurves.nistP384, HashAlgorithmName.SHA384),
-        SecurityAlgorithms.EcdsaSha512 => (ECCurve.NamedCurves.nistP521, HashAlgorithmName.SHA512),
-        _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известная алгоритм")
+        SecurityAlgorithms.EcdsaSha256 => HashAlgorithmName.SHA256,
+        "ES256K" => HashAlgorithmName.SHA256,
+        SecurityAlgorithms.EcdsaSha384 => HashAlgorithmName.SHA384,
+        SecurityAlgorithms.EcdsaSha512 => HashAlgorithmName.SHA512,
+        _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известный алгоритм")
     };
 }
