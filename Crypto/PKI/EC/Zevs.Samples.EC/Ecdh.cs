@@ -1,14 +1,15 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
-using JwtHeaderParameterNames = Microsoft.IdentityModel.JsonWebTokens.JwtHeaderParameterNames;
-using System.Net;
+using Microsoft.IdentityModel.JsonWebTokens;
+using JwtHeaderParameterNames = System.IdentityModel.Tokens.Jwt.JwtHeaderParameterNames;
 
 namespace Zevs.Samples.EC;
 
+/// <summary>
+/// Примеры использования ECDH
+/// </summary>
 public class Ecdh
 {
     public static TheoryData<string, string, string> Algorithms = new()
