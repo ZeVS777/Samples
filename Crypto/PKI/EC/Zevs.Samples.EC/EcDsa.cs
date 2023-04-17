@@ -93,7 +93,7 @@ public class EcDsa
         var publicJwkJson = GetPublicJwk(alg);
         var publicJwk = new JsonWebKey(publicJwkJson);
 
-        Assert.Equal("EC", publicJwk.Kty);
+        Assert.Equal(JsonWebAlgorithmsKeyTypes.EllipticCurve, publicJwk.Kty);
         Assert.Equal(publicJwk.Kty, privateJwk.Kty);
         Assert.Equal(publicJwk.Alg, privateJwk.Alg);
 
@@ -161,7 +161,7 @@ public class EcDsa
 
         var jwk = new JsonWebKey
         {
-            Kty = "EC",
+            Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
             Alg = alg,
             Crv = crv,
             Use = "sig",
@@ -183,7 +183,7 @@ public class EcDsa
 
         var jwk = new JsonWebKey
         {
-            Kty = "EC",
+            Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
             Alg = alg,
             Crv = crv,
             Use = "sig",
@@ -244,28 +244,28 @@ public class EcDsa
 
     private static string GetCrv(ECCurve curve) => curve.Oid.FriendlyName switch
     {
-        nameof(ECCurve.NamedCurves.nistP256) => "P-256",
+        nameof(ECCurve.NamedCurves.nistP256) => JsonWebKeyECTypes.P256,
         "secP256k1" => "secp256k1",
-        nameof(ECCurve.NamedCurves.nistP384) => "P-384",
-        nameof(ECCurve.NamedCurves.nistP521) => "P-521",
+        nameof(ECCurve.NamedCurves.nistP384) => JsonWebKeyECTypes.P384,
+        nameof(ECCurve.NamedCurves.nistP521) => JsonWebKeyECTypes.P521,
         _ => throw new ArgumentOutOfRangeException(nameof(curve), "Не известная кривая")
     };
 
     private static string GetCrv(string alg) => alg switch
     {
-        SecurityAlgorithms.EcdsaSha256 => "P-256",
+        SecurityAlgorithms.EcdsaSha256 => JsonWebKeyECTypes.P256,
         "ES256K" => "secp256k1",
-        SecurityAlgorithms.EcdsaSha384 => "P-384",
-        SecurityAlgorithms.EcdsaSha512 => "P-521",
+        SecurityAlgorithms.EcdsaSha384 => JsonWebKeyECTypes.P384,
+        SecurityAlgorithms.EcdsaSha512 => JsonWebKeyECTypes.P521,
         _ => throw new ArgumentOutOfRangeException(nameof(alg), "Не известный алгоритм")
     };
 
-    private static ECCurve GetCurve(string crv) => crv switch
+    public static ECCurve GetCurve(string crv) => crv switch
     {
-        "P-256" => ECCurve.NamedCurves.nistP256,
+        JsonWebKeyECTypes.P256 => ECCurve.NamedCurves.nistP256,
         "secp256k1" => ECCurve.CreateFromFriendlyName("secP256k1"),
-        "P-384" => ECCurve.NamedCurves.nistP384,
-        "P-521" => ECCurve.NamedCurves.nistP521,
+        JsonWebKeyECTypes.P384 => ECCurve.NamedCurves.nistP384,
+        JsonWebKeyECTypes.P521 => ECCurve.NamedCurves.nistP521,
         _ => throw new ArgumentOutOfRangeException(nameof(crv), "Не известная кривая")
     };
 
