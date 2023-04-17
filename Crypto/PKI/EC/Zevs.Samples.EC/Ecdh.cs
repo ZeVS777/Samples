@@ -11,7 +11,7 @@ namespace Zevs.Samples.EC;
 
 public class Ecdh
 {
-    public static TheoryData<string, string, string> Crvs = new()
+    public static TheoryData<string, string, string> Algorithms = new()
     {
         { JsonWebKeyECTypes.P256, SecurityAlgorithms.EcdhEsA128kw, SecurityAlgorithms.Aes128CbcHmacSha256 },
         { JsonWebKeyECTypes.P384, SecurityAlgorithms.EcdhEsA192kw, SecurityAlgorithms.Aes192CbcHmacSha384 },
@@ -22,7 +22,7 @@ public class Ecdh
     /// Использование эллиптических кривых для реализации алгоритмов ECDH-ES
     /// </summary>
     [Theory]
-    [MemberData(nameof(Crvs))]
+    [MemberData(nameof(Algorithms))]
     public void Agreement(string crv, string alg, string enc)
     {
         var aliceCredentials = GetCredentials(crv, alg, enc);
