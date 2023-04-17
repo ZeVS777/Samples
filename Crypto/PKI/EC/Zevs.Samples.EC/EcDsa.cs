@@ -197,7 +197,7 @@ public class EcDsa
     private static ECParameters GetFromJwk(JsonWebKey jwk)
     {
         var crv = GetCrv(jwk.Alg);
-        if (!string.IsNullOrEmpty(jwk.Crv)) 
+        if (!string.IsNullOrEmpty(jwk.Crv))
             Assert.Equal(jwk.Crv, crv);
 
         return new ECParameters
