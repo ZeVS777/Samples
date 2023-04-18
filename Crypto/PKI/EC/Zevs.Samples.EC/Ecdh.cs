@@ -14,6 +14,9 @@ public class Ecdh
 {
     public static TheoryData<string, string, string> Algorithms = new()
     {
+        { JsonWebKeyECTypes.P256, SecurityAlgorithms.EcdhEs, SecurityAlgorithms.Aes128Gcm },
+        { JsonWebKeyECTypes.P384, SecurityAlgorithms.EcdhEs, SecurityAlgorithms.Aes192Gcm },
+        { JsonWebKeyECTypes.P521, SecurityAlgorithms.EcdhEs, SecurityAlgorithms.Aes256Gcm },
         { JsonWebKeyECTypes.P256, SecurityAlgorithms.EcdhEsA128kw, SecurityAlgorithms.Aes128CbcHmacSha256 },
         { JsonWebKeyECTypes.P384, SecurityAlgorithms.EcdhEsA192kw, SecurityAlgorithms.Aes192CbcHmacSha384 },
         { JsonWebKeyECTypes.P521, SecurityAlgorithms.EcdhEsA256kw, SecurityAlgorithms.Aes256CbcHmacSha512 }
@@ -27,6 +30,7 @@ public class Ecdh
     public void Agreement(string crv, string alg, string enc)
     {
         var aliceCredentials = GetCredentials(crv, alg, enc);
+        aliceCredentials.Key.CryptoProviderFactory.CustomCryptoProvider = new CustomCryptoProvider();
         var bobCredentials = GetCredentials(crv, alg, enc);
 
         var headerParameters = new JwtHeader(aliceCredentials)

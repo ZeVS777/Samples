@@ -9,16 +9,20 @@ namespace Zevs.Samples.EC;
 public class CustomCryptoProvider : ICryptoProvider
 {
     /// <inheritdoc />
-    public bool IsSupportedAlgorithm(string algorithm, params object[] args) => algorithm == "ES256K";
+    public bool IsSupportedAlgorithm(string algorithm, params object[] args) => algorithm 
+        is "ES256K" 
+        or SecurityAlgorithms.Aes128Gcm
+        or SecurityAlgorithms.Aes256Gcm
+        or SecurityAlgorithms.Aes192Gcm;
 
     /// <inheritdoc />
-    public object Create(string algorithm, params object[] args)
+    public object Create(string algorithm, params object[] args) => algorithm switch
     {
-        if (algorithm != "ES256K" || args[0] is not CustomEcDsaSecurityKey key)
-            throw new NotSupportedException();
-
-        return new CustomSignatureProvider(key, algorithm);
-    }
+        "ES256K" when args[0] is CustomEcDsaSecurityKey es => new CustomSignatureProvider(es, algorithm),
+        SecurityAlgorithms.Aes128Gcm or SecurityAlgorithms.Aes256Gcm or SecurityAlgorithms.Aes192Gcm when args[0] is SecurityKey key =>
+            new CustomAuthenticatedEncryptionProvider(key, algorithm),
+        _ => throw new NotSupportedException()
+    };
 
     /// <inheritdoc />
     public void Release(object cryptoInstance)
@@ -74,4 +78,24 @@ public class CustomSignatureProvider : SignatureProvider
     /// <param name="input">Байты, которые требуется подписать.</param>
     /// <param name="signature">Подпись, которую требуется проверить.</param>
     public override bool Verify(byte[] input, byte[] signature) => _securityKey.ECDsa.VerifyData(input, signature, HashAlgorithmName.SHA256);
+}
+
+/// <summary>
+/// Самописный провайдер функций шифрования с поддержкой дополнительных алгоритмов
+/// </summary>
+public class CustomAuthenticatedEncryptionProvider : AuthenticatedEncryptionProvider
+{
+    public CustomAuthenticatedEncryptionProvider(SecurityKey key, string algorithm) : base(key, algorithm) { }
+
+    public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
+    {
+        using var aesGcm = new AesGcm(((SymmetricSecurityKey)Key).Key);
+        var nonce = new byte[AesGcm.NonceByteSizes.MaxSize];
+        RandomNumberGenerator.Fill(nonce);
+        var tag = new byte[AesGcm.TagByteSizes.MaxSize];
+        var cipherText = new byte[plaintext.Length];
+        aesGcm.Encrypt(nonce, plaintext, cipherText, tag, authenticatedData);
+
+        return new AuthenticatedEncryptionResult(Key, cipherText, nonce, tag);
+    }
 }
