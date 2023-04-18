@@ -59,4 +59,4 @@ openssl pkcs12 -export -out cert.pfx -inkey private-key.pem -in cert.pem
 
 ## Применение ECDH-ES механизмов для шифрооованной передачи данных
 
-ООписание алгоритмов ECDH-ES можно найти в [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-15)
+Описание алгоритмов ECDH-ES можно найти в [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-15)
