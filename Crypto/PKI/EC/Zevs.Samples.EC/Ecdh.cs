@@ -72,9 +72,12 @@ public class Ecdh
         var bobEncryptionProvider =
             bobCryptoProviderFactory.CreateAuthenticatedEncryptionProvider(bobUnwrappedKey, bobCredentials.Enc);
 
+        //A.2.5.  Additional Authenticated Data https://www.rfc-editor.org/rfc/rfc7516#page-40
         var authData =
             Encoding.ASCII.GetBytes(
-                Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(headerParameters.SerializeToJson())));
+                Base64UrlEncoder.Encode(
+                    Encoding.UTF8.GetBytes(headerParameters.SerializeToJson())));
+
         return bobEncryptionProvider.Decrypt(aliceEncryptedResult.Ciphertext, authData, aliceEncryptedResult.IV,
             aliceEncryptedResult.AuthenticationTag);
     }
