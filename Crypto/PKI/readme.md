@@ -3,7 +3,9 @@
 Показаны примеры исполоьзования набора различных средств (алгоритмов, инстрментов, сервисов) для реализации криптозадач на основе закрытого и открытого ключей: 
 создания и проверки подписи, шифрование ключей и содержимого, а так же способы хранения и передачи настроек алгоритмов.
 
-Рекомендации по организации такоой инфраструктур можно найти в [NIST.SP.800-56Ar2](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf)
+Рекомендации по организации такоой инфраструктур можно найти в [NIST.SP.800-56Ar2](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf).
+Рекомендации по использовании алгоритмов криптографии в условиях появления квантовых вычислений можно прочитать в [Исследованиях Microsoft]( https://www.microsoft.com/en-us/research/wp-content/uploads/2017/09/1706.06752.pdf) на эту тему.
+Рекомендации по настройкам алгоритмов можно прочитать на сайте [ecrypt](https://www.ecrypt.eu.org/csa/documents/D5.4-FinalAlgKeySizeProt.pdf)
 
 ## EC алгоритмы
 
@@ -18,6 +20,8 @@
  - SECP256K1 - SEC кривая описанная в [SEC 2: Recommended Elliptic Curve Domain Parameters](https://www.secg.org/sec2-v2.pdf).
  - P-384 - secp384r1 NIST кривая описанная в [DSS FIPS PUB 186-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf).
  - P-521 - secp521r1 NIST кривая описанная в [DSS FIPS PUB 186-4](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf).
+
+*Безопасность таких кривых можно проверить на сайте [safecurves](https://safecurves.cr.yp.to)*
 
 ### Алгоритмы ECDH получения общего секретного ключа по имеющимся пары открытый/закрытый ключ на эллиптических кривых
  - ECDH-ES - использование объединяющей функции формирования ключа (Concat KDF)
