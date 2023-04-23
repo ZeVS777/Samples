@@ -8,6 +8,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.X509;
 using Zevs.Samples.Okp.EdCryptoWrapppers;
+using NamedCurves = Zevs.Samples.Okp.EdCryptoWrapppers.SecurityAlgorithmsAdditional.NamedCurves;
 
 namespace Zevs.Samples.Okp;
 
@@ -18,8 +19,8 @@ public class Okp
 {
     public static TheoryData<string> Crv = new()
     {
-        "Ed25519",
-        "Ed448"
+        NamedCurves.Curve25519,
+        NamedCurves.Curve448
     };
 
     private readonly byte[] _data = Encoding.UTF8.GetBytes("Криптография - круто!");
@@ -68,7 +69,7 @@ public class Okp
         var publicJwkJson = GetPublicJwk(crv);
         var publicJwk = new JsonWebKey(publicJwkJson);
 
-        Assert.Equal("OKP", publicJwk.Kty);
+        Assert.Equal(SecurityAlgorithmsAdditional.EdDsaKty, publicJwk.Kty);
         Assert.Equal(publicJwk.Kty, privateJwk.Kty);
         Assert.Equal(publicJwk.Alg, privateJwk.Alg);
 
@@ -131,8 +132,8 @@ public class Okp
 
         var jwk = new JsonWebKey
         {
-            Kty = "OKP",
-            Alg = "EdDSA",
+            Kty = SecurityAlgorithmsAdditional.EdDsaKty,
+            Alg = SecurityAlgorithmsAdditional.EdDsa,
             Crv = crv,
             Use = "sig",
             D = Base64UrlEncoder.Encode(edParameters.D)
@@ -149,8 +150,8 @@ public class Okp
 
         var jwk = new JsonWebKey
         {
-            Kty = "OKP",
-            Alg = "EdDSA",
+            Kty = SecurityAlgorithmsAdditional.EdDsaKty,
+            Alg = SecurityAlgorithmsAdditional.EdDsa,
             Crv = crv,
             Use = "sig",
             X = Base64UrlEncoder.Encode(ecParameters.X)
@@ -161,16 +162,14 @@ public class Okp
 
     private static EdParameters GetFromJwk(JsonWebKey jwk)
     {
-        Assert.Equal("OKP", jwk.Kty);
-        Assert.Equal("EdDSA", jwk.Alg);
+        Assert.Equal(SecurityAlgorithmsAdditional.EdDsaKty, jwk.Kty);
+        Assert.Equal(SecurityAlgorithmsAdditional.EdDsa, jwk.Alg);
 
         if (jwk.D != null)
             return new EdParameters(jwk.Crv switch
             {
-                SecurityAlgorithmsAdditional.NamedCurves.Curve25519 => new Ed25519PrivateKeyParameters(
-                    Base64UrlEncoder.DecodeBytes(jwk.D)),
-                SecurityAlgorithmsAdditional.NamedCurves.Curve448 => new Ed448PrivateKeyParameters(
-                    Base64UrlEncoder.DecodeBytes(jwk.D)),
+                NamedCurves.Curve25519 => new Ed25519PrivateKeyParameters(Base64UrlEncoder.DecodeBytes(jwk.D)),
+                NamedCurves.Curve448 => new Ed448PrivateKeyParameters(Base64UrlEncoder.DecodeBytes(jwk.D)),
                 _ => throw new NotSupportedException()
             }, jwk.Crv);
 
@@ -178,10 +177,8 @@ public class Okp
         if (jwk.X != null)
             return new EdParameters(jwk.Crv switch
             {
-                SecurityAlgorithmsAdditional.NamedCurves.Curve25519 => new Ed25519PublicKeyParameters(
-                    Base64UrlEncoder.DecodeBytes(jwk.X)),
-                SecurityAlgorithmsAdditional.NamedCurves.Curve448 => new Ed448PublicKeyParameters(
-                    Base64UrlEncoder.DecodeBytes(jwk.X)),
+                NamedCurves.Curve25519 => new Ed25519PublicKeyParameters(Base64UrlEncoder.DecodeBytes(jwk.X)),
+                NamedCurves.Curve448 => new Ed448PublicKeyParameters(Base64UrlEncoder.DecodeBytes(jwk.X)),
                 _ => throw new NotSupportedException()
             }, jwk.Crv);
 

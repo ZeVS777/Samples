@@ -6,6 +6,11 @@
 public class SecurityAlgorithmsAdditional
 {
     /// <summary>
+    /// Тип ключа, описывающий использование алгоритмов, основанных на кривых Эдвардса <seealso href="https://tools.ietf.org/html/rfc8037#section-5"/>
+    /// </summary>
+    public const string EdDsaKty = "OKP";
+
+    /// <summary>
     /// Алгоритм подписи, основанной на кривых Эдвардса <seealso href="https://tools.ietf.org/html/rfc8037"/>
     /// </summary>
     public const string EdDsa = "EdDSA";
