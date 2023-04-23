@@ -145,7 +145,7 @@ public class Rsa
         var hashingAlg = algorithmUsing == AlgorithmUsing.Signing ? GetHashingFunc(alg) : HashAlgorithmName.SHA256;
 
         using var rsa = RSA.Create(3072);
-        var req = new CertificateRequest("C=RU, CN=ZeVS", rsa, hashingAlg, padding);
+        var req = new CertificateRequest("C=RU,ST=Moscow,L=Moscow,O=ZeVS", rsa, hashingAlg, padding);
         req.CertificateExtensions.Add(new X509KeyUsageExtension(
             algorithmUsing == AlgorithmUsing.Signing ? X509KeyUsageFlags.DigitalSignature : X509KeyUsageFlags.KeyEncipherment,
             critical: true));

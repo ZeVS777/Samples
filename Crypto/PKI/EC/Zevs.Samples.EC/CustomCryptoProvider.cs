@@ -49,26 +49,22 @@ public class CustomEcDsaSecurityKey : ECDsaSecurityKey
 /// </summary>
 public class CustomSignatureProvider : SignatureProvider
 {
-    private readonly CustomEcDsaSecurityKey _securityKey;
-
     /// <summary>
     /// Создать новый экземпляр <see cref="CustomSignatureProvider"/>
     /// </summary>
     /// <param name="key">Ключ безопасности</param>
     /// <param name="algorithm">Алгоритм, используемый при создании и проверке подписи</param>
     /// <exception cref="NotSupportedException">Алгоритм или ключ не поддерживаются</exception>
-    public CustomSignatureProvider(CustomEcDsaSecurityKey key, string algorithm) : base(key, algorithm) => _securityKey = key;
+    public CustomSignatureProvider(CustomEcDsaSecurityKey key, string algorithm) : base(key, algorithm) { }
 
-    protected override void Dispose(bool disposing)
-    {
-    }
+    protected override void Dispose(bool disposing) { }
 
     /// <summary>
     /// Создаёт подпись 'input' используя <see cref="CustomEcDsaSecurityKey" /> и алгоритм, заданный в <see cref="CustomSignatureProvider(CustomEcDsaSecurityKey,string)" />.
     /// </summary>
     /// <param name="input">Байты, которые требуется подписать.</param>
     /// <returns>Подпись input.</returns>
-    public override byte[] Sign(byte[] input) => _securityKey.ECDsa.SignData(input, HashAlgorithmName.SHA256);
+    public override byte[] Sign(byte[] input) => ((CustomEcDsaSecurityKey)Key).ECDsa.SignData(input, HashAlgorithmName.SHA256);
 
     /// <summary>
     /// Подтверждает, что подпись <paramref name="signature"/> входных данных <paramref name="input"/>, использующая
@@ -77,7 +73,8 @@ public class CustomSignatureProvider : SignatureProvider
     /// </summary>
     /// <param name="input">Байты, которые требуется подписать.</param>
     /// <param name="signature">Подпись, которую требуется проверить.</param>
-    public override bool Verify(byte[] input, byte[] signature) => _securityKey.ECDsa.VerifyData(input, signature, HashAlgorithmName.SHA256);
+    public override bool Verify(byte[] input, byte[] signature) => 
+        ((CustomEcDsaSecurityKey)Key).ECDsa.VerifyData(input, signature, HashAlgorithmName.SHA256);
 }
 
 /// <summary>

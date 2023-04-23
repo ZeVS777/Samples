@@ -119,7 +119,8 @@ public class EcDsa
         var hashingAlg = GetHash(alg);
 
         using var ecDsa = ECDsa.Create(GetCurve(crv));
-        var req = new CertificateRequest("C=RU, CN=ZeVS", ecDsa, hashingAlg);
+        var req = new CertificateRequest("C=RU, ST=Moscow, L=Moscow, O=ZeVS", ecDsa, hashingAlg);
+        req.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature, true));
         var cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddMinutes(1));
 
         var rsaPrivate = cert.GetECDsaPrivateKey();
