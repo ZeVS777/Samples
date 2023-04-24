@@ -57,6 +57,6 @@ openssl pkcs12 -export -out cert.pfx -inkey private-key.pem -in cert.pem
 **Microsoft.IdentityModel.Tokens** предлагает удобный инструмент для проведения EC алгоритмами процедуры подтверждения валидности подписи.
 Однако он поддерживает ограниченный [набор алгоритмов](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Supported-Algorithms), среди которых нет ES256K. Для поддержки алгоритмов, не поддерживаемых стандартными инструментами, можно расширить механизм: см. CustomCryptoProvider.cs.
 
-## Применение ECDH-ES механизмов для шифрооованной передачи данных
+## Применение ECDH-ES механизмов для шифрованной передачи данных
 
 Описание алгоритмов ECDH-ES можно найти в [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-15)

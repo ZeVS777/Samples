@@ -49,6 +49,22 @@ public class EdDsa
 
                     return new EdDsa { Parameters = new EdParameters(keyPair, curve) };
                 }
+            case NamedCurves.CurveX25519:
+                {
+                    var generator = new X25519KeyPairGenerator();
+                    generator.Init(new X25519KeyGenerationParameters(new SecureRandom()));
+                    var keyPair = generator.GenerateKeyPair();
+
+                    return new EdDsa { Parameters = new EdParameters(keyPair, curve) };
+                }
+            case NamedCurves.CurveX448:
+                {
+                    var generator = new X448KeyPairGenerator();
+                    generator.Init(new X448KeyGenerationParameters(new SecureRandom()));
+                    var keyPair = generator.GenerateKeyPair();
+
+                    return new EdDsa { Parameters = new EdParameters(keyPair, curve) };
+                }
             default:
                 throw new NotSupportedException("Кривая указана неверно или алгоритмом не поддерживается");
         }
@@ -86,7 +102,22 @@ public class EdDsa
             case Ed448PublicKeyParameters publicParameters:
                 Parameters = new EdParameters(publicParameters, NamedCurves.Curve448);
                 goto validate;
+            case X25519PrivateKeyParameters privateParameters:
+                Parameters = new EdParameters(privateParameters, NamedCurves.Curve25519);
+                goto validate;
+            case X25519PublicKeyParameters publicParameters:
+                Parameters = new EdParameters(publicParameters, NamedCurves.Curve25519);
+                goto validate;
+            case X448PrivateKeyParameters privateParameters:
+                Parameters = new EdParameters(privateParameters, NamedCurves.Curve448);
+                goto validate;
+            case X448PublicKeyParameters publicParameters:
+                Parameters = new EdParameters(publicParameters, NamedCurves.Curve448);
+                goto validate;
             case X509Certificate { SigAlgName: NamedCurves.Curve448 or NamedCurves.Curve25519 } certificate:
+                Parameters = new EdParameters(certificate.GetPublicKey(), certificate.SigAlgName);
+                goto validate;
+            case X509Certificate { SigAlgName: NamedCurves.CurveX448 or NamedCurves.CurveX25519 } certificate:
                 Parameters = new EdParameters(certificate.GetPublicKey(), certificate.SigAlgName);
                 goto validate;
         }

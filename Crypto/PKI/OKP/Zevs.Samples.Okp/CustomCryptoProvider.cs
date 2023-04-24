@@ -1,24 +1,30 @@
-﻿using Microsoft.IdentityModel.Logging;
+﻿using System.Security.Cryptography;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Zevs.Samples.Okp.EdCryptoWrapppers;
 
 namespace Zevs.Samples.Okp;
 
 /// <summary>
-/// Провайдер криптографических инструментов для поддержки алгоритмов, основанных на кривых Эдвардса
+/// Самописный провайдер криптографических функций для поддержки дополнительных алгоритмов
 /// </summary>
-public class EdDsaCryptoProvider : ICryptoProvider
+public class CustomCryptoProvider : ICryptoProvider
 {
     /// <inheritdoc />
-    public bool IsSupportedAlgorithm(string algorithm, params object[] args) => algorithm == SecurityAlgorithmsAdditional.EdDsa;
+    public bool IsSupportedAlgorithm(string algorithm, params object[] args) => algorithm
+        is SecurityAlgorithmsAdditional.EdDsa
+        or SecurityAlgorithms.Aes128Gcm
+        or SecurityAlgorithms.Aes256Gcm
+        or SecurityAlgorithms.Aes192Gcm;
 
     /// <inheritdoc />
-    public object Create(string algorithm, params object[] args)
+    public object Create(string algorithm, params object[] args) => algorithm switch
     {
-        if (!IsSupportedAlgorithm(algorithm, args) || args[0] is not EdDsaSecurityKey key) throw new NotSupportedException();
-
-        return new EdDsaSignatureProvider(key, algorithm);
-    }
+        SecurityAlgorithmsAdditional.EdDsa when args[0] is EdDsaSecurityKey edKey => new EdDsaSignatureProvider(edKey, algorithm),
+        SecurityAlgorithms.Aes128Gcm or SecurityAlgorithms.Aes256Gcm or SecurityAlgorithms.Aes192Gcm when args[0] is SecurityKey key =>
+            new CustomAuthenticatedEncryptionProvider(key, algorithm),
+        _ => throw new NotSupportedException()
+    };
 
     /// <inheritdoc />
     public void Release(object cryptoInstance)
@@ -40,7 +46,7 @@ public class EdDsaSecurityKey : AsymmetricSecurityKey
     public EdDsaSecurityKey(EdDsa edDsa)
     {
         EdDsa = edDsa ?? throw LogHelper.LogArgumentNullException(nameof(edDsa));
-        CryptoProviderFactory.CustomCryptoProvider = new EdDsaCryptoProvider();
+        CryptoProviderFactory.CustomCryptoProvider = new CustomCryptoProvider();
     }
 
     /// <summary>
@@ -87,4 +93,25 @@ public class EdDsaSignatureProvider : SignatureProvider
     /// <inheritdoc />
     public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
         => ((EdDsaSecurityKey)Key).EdDsa.Verify(input, inputOffset, inputLength, signature, signatureOffset, signatureLength);
+}
+
+
+/// <summary>
+/// Самописный провайдер функций шифрования с поддержкой дополнительных алгоритмов
+/// </summary>
+public class CustomAuthenticatedEncryptionProvider : AuthenticatedEncryptionProvider
+{
+    public CustomAuthenticatedEncryptionProvider(SecurityKey key, string algorithm) : base(key, algorithm) { }
+
+    public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
+    {
+        using var aesGcm = new AesGcm(((SymmetricSecurityKey)Key).Key);
+        var nonce = new byte[AesGcm.NonceByteSizes.MaxSize];
+        RandomNumberGenerator.Fill(nonce);
+        var tag = new byte[AesGcm.TagByteSizes.MaxSize];
+        var cipherText = new byte[plaintext.Length];
+        aesGcm.Encrypt(nonce, plaintext, cipherText, tag, authenticatedData);
+
+        return new AuthenticatedEncryptionResult(Key, cipherText, nonce, tag);
+    }
 }

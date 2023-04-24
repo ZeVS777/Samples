@@ -49,6 +49,6 @@ openssl req -new -x509 -key private-key.pem -out cert.pem -days 360
 не поддерживаемых стандартными инструментами, можно расширить механизм: 
 см. CustomCryptoProvider.cs.
 
-## Применение ECDH-ES механизмов для шифрооованной передачи данных
+## Применение ECDH-ES механизмов для шифрованной передачи данных
 
 Описание алгоритмов ECDH-ES можно найти в [RFC8037](https://datatracker.ietf.org/doc/html/rfc8037#section-3.2)

@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
+using NamedCurves = Zevs.Samples.Okp.EdCryptoWrapppers.SecurityAlgorithmsAdditional.NamedCurves;
 
 namespace Zevs.Samples.Okp.EdCryptoWrapppers;
 
@@ -23,7 +24,7 @@ public struct EdParameters
 
         switch (curve)
         {
-            case SecurityAlgorithmsAdditional.NamedCurves.Curve25519:
+            case NamedCurves.Curve25519:
                 {
                     if (parameter.IsPrivate)
                         D = ((Ed25519PrivateKeyParameters)parameter).GetEncoded();
@@ -31,12 +32,28 @@ public struct EdParameters
                         X = ((Ed25519PublicKeyParameters)parameter).GetEncoded();
                     break;
                 }
-            case SecurityAlgorithmsAdditional.NamedCurves.Curve448:
+            case NamedCurves.Curve448:
                 {
                     if (parameter.IsPrivate)
                         D = ((Ed448PrivateKeyParameters)parameter).GetEncoded();
                     else
                         X = ((Ed448PublicKeyParameters)parameter).GetEncoded();
+                    break;
+                }
+            case NamedCurves.CurveX25519:
+                {
+                    if (parameter.IsPrivate)
+                        D = ((X25519PrivateKeyParameters)parameter).GetEncoded();
+                    else
+                        X = ((X25519PublicKeyParameters)parameter).GetEncoded();
+                    break;
+                }
+            case NamedCurves.CurveX448:
+                {
+                    if (parameter.IsPrivate)
+                        D = ((X448PrivateKeyParameters)parameter).GetEncoded();
+                    else
+                        X = ((X448PublicKeyParameters)parameter).GetEncoded();
                     break;
                 }
             default: throw new NotSupportedException("Кривая указана неверно или алгоритмом не поддерживается");
@@ -62,13 +79,21 @@ public struct EdParameters
 
         switch (curve)
         {
-            case SecurityAlgorithmsAdditional.NamedCurves.Curve25519:
+            case NamedCurves.Curve25519:
                 D = ((Ed25519PrivateKeyParameters)keyPair.Private).GetEncoded();
                 X = ((Ed25519PublicKeyParameters)keyPair.Public).GetEncoded();
                 break;
-            case SecurityAlgorithmsAdditional.NamedCurves.Curve448:
+            case NamedCurves.Curve448:
                 D = ((Ed448PrivateKeyParameters)keyPair.Private).GetEncoded();
                 X = ((Ed448PublicKeyParameters)keyPair.Public).GetEncoded();
+                break;
+            case NamedCurves.CurveX25519:
+                D = ((X25519PrivateKeyParameters)keyPair.Private).GetEncoded();
+                X = ((X25519PublicKeyParameters)keyPair.Public).GetEncoded();
+                break;
+            case NamedCurves.CurveX448:
+                D = ((X448PrivateKeyParameters)keyPair.Private).GetEncoded();
+                X = ((X448PublicKeyParameters)keyPair.Public).GetEncoded();
                 break;
             default:
                 throw new NotSupportedException("Кривая указана неверно или алгоритмом не поддерживается");
@@ -117,18 +142,18 @@ public struct EdParameters
         if (D != null)
             switch (Curve)
             {
-                case SecurityAlgorithmsAdditional.NamedCurves.Curve25519 when D.Length != 32 && D.Length != 32 * 2:
+                case NamedCurves.Curve25519 or NamedCurves.CurveX25519 when D.Length != 32 && D.Length != 32 * 2:
                     throw new CryptographicException("Неверная длина ключа. Должна быть 32 байта.");
-                case SecurityAlgorithmsAdditional.NamedCurves.Curve448 when D.Length != 57 && D.Length != 57 * 2:
+                case NamedCurves.Curve448 or NamedCurves.CurveX448 when D.Length != 57 && D.Length != 57 * 2:
                     throw new CryptographicException("Неверная длина ключа. Должна быть 57 байт.");
             }
 
         if (X != null)
             switch (Curve)
             {
-                case SecurityAlgorithmsAdditional.NamedCurves.Curve25519 when X.Length != 32:
+                case NamedCurves.Curve25519 or NamedCurves.CurveX25519 when X.Length != 32:
                     throw new CryptographicException("Неверная длина ключа. Должна быть 32 байта.");
-                case SecurityAlgorithmsAdditional.NamedCurves.Curve448 when X.Length != 57:
+                case NamedCurves.Curve448 or NamedCurves.CurveX448 when X.Length != 57:
                     throw new CryptographicException("Неверная длина ключа. Должна быть 57 байт.");
             }
     }

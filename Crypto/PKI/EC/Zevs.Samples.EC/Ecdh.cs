@@ -157,6 +157,6 @@ public class Ecdh
         SecurityAlgorithms.Aes128CbcHmacSha256 => 256,
         SecurityAlgorithms.Aes192CbcHmacSha384 => 384,
         SecurityAlgorithms.Aes256CbcHmacSha512 => 512,
-        _ => throw new NotSupportedException()
+        _ => throw new NotSupportedException("Не известный алгоритм")
     };
 }
