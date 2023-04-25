@@ -52,10 +52,10 @@
  - RSA-OAEP-256 – RSAES алгоритм, использующий оптимальное асимметричное шифрование с дополнением (OAEP), с хэш функцией SHA-256 и функции генерации маски MGF1 с SHA-256.
  
  ### Алгоритмы создания и проверки подписи:
- - PS256 - RSASSA-PSS с хэш функцией SHA-256 и MGF1 с SHA-256, описанное в [RFC8017](https://www.rfc-editor.org/rfc/rfc8017#page-32) и в [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-10).
+ - PS256 - RSASSA-PSS с хэш функцией SHA-256 и MGF1 с SHA-256, описанное в [RFC8017](https://datatracker.ietf.org/doc/html/rfc8017#section-8.1) и в [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518#section-3.5).
  - PS384 - RSASSA-PSS с хэш функцией SHA-384 и MGF1 с SHA-384.
  - PS512 - RSASSA-PSS с хэш функцией SHA-512 и MGF1 с SHA-512.
- - RS256 - RSASSA-PKCS-v1_5 с хэш функцией SHA-256, описанное в [RFC8017](https://www.rfc-editor.org/rfc/rfc8017#page-35) и в [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-8).
+ - RS256 - RSASSA-PKCS-v1_5 с хэш функцией SHA-256, описанное в [RFC8017](https://datatracker.ietf.org/doc/html/rfc8017#section-8.2) и в [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-8).
  - RS384 - RSASSA-PKCS-v1_5 с хэш функцией SHA-384.
  - RS512 - RSASSA-PKCS-v1_5 с хэш функцией SHA-512.
 
@@ -66,8 +66,8 @@
 ## Edwards curve алгоритмы, [OKP](https://datatracker.ietf.org/doc/html/rfc8037#section-2)
 
 ### Алгоритмы создания и проверки подписи:
- - Ed25519 - EdDSA, использующая SHA-256 функцию предварительного хэширования и ключ, созданнй на эллиптической кривой Ed25519. Этот алгоритм описан в [RFC8037](https://datatracker.ietf.org/doc/html/rfc8037#section-3.1) и в [RFC8032](https://www.rfc-editor.org/rfc/rfc8032#page-9).
- - Ed448 - EdDSA, использующая SHA-256 функцию предварительного хэширования и ключ, созданнй на эллиптической кривой P-256K. Этот алгоритм описан в [RFC8037](https://datatracker.ietf.org/doc/html/rfc8037#section-3.1) и в [RFC8032](https://www.rfc-editor.org/rfc/rfc8032#page-15).
+ - Ed25519 - EdDSA, использующая SHA-256 функцию предварительного хэширования и ключ, созданнй на эллиптической кривой Ed25519. Этот алгоритм описан в [RFC8037](https://datatracker.ietf.org/doc/html/rfc8037#section-3.1) и в [RFC8032](https://datatracker.ietf.org/doc/html/rfc8032#section-5.1).
+ - Ed448 - EdDSA, использующая SHA-256 функцию предварительного хэширования и ключ, созданнй на эллиптической кривой P-256K. Этот алгоритм описан в [RFC8037](https://datatracker.ietf.org/doc/html/rfc8037#section-3.1) и в [RFC8032](https://www.rfc-editor.org/rfc/rfc8032#section-5.2).
  
 ### Эллиптические кривые, которые используют данные алгоритмы:
  - Curve25519 - криптографическая эллиптическая кривая, описанная в [RFC7748](https://datatracker.ietf.org/doc/html/rfc7748#section-4.1)
@@ -76,17 +76,17 @@
 *Безопасность таких кривых можно проверить на сайте [safecurves](https://safecurves.cr.yp.to)*
 
 ### Алгоритмы ECDH получения общего секретного ключа по имеющимся пары открытый/закрытый ключ на эллиптических кривых
- - ECDH-ES - использование объединяющей функции формирования ключа (Concat KDF), описанной в [NIST.SP.800-56Ar2](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf) раздел 5.8.1
-   1. A128GCM - использование первых 128 бит результата функции KDF для шифрования данных. [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-15)
-   3. A256GCM - использование первых 256 бит результата функции KDF для шифрования данных. [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-15)
- - ECDH-ES+A128KW - оборачивание сгенериванного ключа длиной в 256 бит, с помощью AES , для которой используется 128 первых бит результата функции KDF
-   * Для шифрования используется алгоритм A128CBC-HS256 - AES_128_CBC_HMAC_SHA_256 описанный в [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-26)
- - ECDH-ES+A256KW - оборачивание сгенериванного ключа длиной в 512 бит, с помощью AES , для которой используется 256 первых бит результата функции KDF
-   * Для шифрования используется алгоритм A256CBC-HS512 - AES_256_CBC_HMAC_SHA_512 описанный в [RFC7518](https://www.rfc-editor.org/rfc/rfc7518#page-26)
+ - ECDH-ES - использование объединяющей функции формирования ключа (Concat KDF), описанной в [NIST.SP.800-56Ar2](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf) раздел 5.8.1 и в [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2)
+   1. A128GCM - использование первых 128 бит результата функции KDF для шифрования данных. [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518#section-5.3)
+   2. A256GCM - использование первых 256 бит результата функции KDF для шифрования данных. [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518#section-5.3)
+ - ECDH-ES+A128KW - оборачивание сгенериванного ключа длиной в 256 бит, с помощью AES [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6), для которой используется 128 первых бит результата функции KDF
+   * Для шифрования используется алгоритм A128CBC-HS256 - AES_128_CBC_HMAC_SHA_256 описанный в [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.3)
+ - ECDH-ES+A256KW - оборачивание сгенериванного ключа длиной в 512 бит, с помощью AES [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518#section-4.6), для которой используется 256 первых бит результата функции KDF
+   * Для шифрования используется алгоритм A256CBC-HS512 - AES_256_CBC_HMAC_SHA_512 описанный в [RFC7518](https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.5)
    
 ### Механизмы, использемые при ECDH, основанных на эллиптических кривых Эдвардса
- - X25519 - механизм ECDH алгоритма, оописанный в [RFC7748](https://datatracker.ietf.org/doc/html/rfc7748#page-7).
- - X448 - механизм ECDH алгоритма, оописанный в [RFC7748](https://datatracker.ietf.org/doc/html/rfc7748#page-7).
+ - X25519 - механизм ECDH алгоритма, оописанный в [RFC7748](https://datatracker.ietf.org/doc/html/rfc7748#section-5).
+ - X448 - механизм ECDH алгоритма, оописанный в [RFC7748](https://datatracker.ietf.org/doc/html/rfc7748#section-5).
 
 ### Примеры
 
