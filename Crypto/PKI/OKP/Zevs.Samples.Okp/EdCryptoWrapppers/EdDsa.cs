@@ -88,6 +88,7 @@ public class EdDsa
     public void ImportFromPem(string input)
     {
         var pem = new PemReader(new StringReader(input)).ReadObject();
+pem:
         switch (pem)
         {
             case Ed25519PrivateKeyParameters privateParameters:
@@ -114,12 +115,9 @@ public class EdDsa
             case X448PublicKeyParameters publicParameters:
                 Parameters = new EdParameters(publicParameters, NamedCurves.Curve448);
                 goto validate;
-            case X509Certificate { SigAlgName: NamedCurves.Curve448 or NamedCurves.Curve25519 } certificate:
-                Parameters = new EdParameters(certificate.GetPublicKey(), certificate.SigAlgName);
-                goto validate;
-            case X509Certificate { SigAlgName: NamedCurves.CurveX448 or NamedCurves.CurveX25519 } certificate:
-                Parameters = new EdParameters(certificate.GetPublicKey(), certificate.SigAlgName);
-                goto validate;
+            case X509Certificate certificate:
+                pem = certificate.GetPublicKey();
+                goto pem;
         }
 
         throw new NotSupportedException("Формат файла или его содержимое не соответствует ожидаемым параметрам");
