@@ -88,42 +88,21 @@ public class EdDsa
     public void ImportFromPem(string input)
     {
         var pem = new PemReader(new StringReader(input)).ReadObject();
-pem:
-        switch (pem)
+
+        if (pem is X509Certificate certificate) pem = certificate.GetPublicKey();
+
+        Parameters = pem switch
         {
-            case Ed25519PrivateKeyParameters privateParameters:
-                Parameters = new EdParameters(privateParameters, NamedCurves.Curve25519);
-                goto validate;
-            case Ed25519PublicKeyParameters publicParameters:
-                Parameters = new EdParameters(publicParameters, NamedCurves.Curve25519);
-                goto validate;
-            case Ed448PrivateKeyParameters privateParameters:
-                Parameters = new EdParameters(privateParameters, NamedCurves.Curve448);
-                goto validate;
-            case Ed448PublicKeyParameters publicParameters:
-                Parameters = new EdParameters(publicParameters, NamedCurves.Curve448);
-                goto validate;
-            case X25519PrivateKeyParameters privateParameters:
-                Parameters = new EdParameters(privateParameters, NamedCurves.Curve25519);
-                goto validate;
-            case X25519PublicKeyParameters publicParameters:
-                Parameters = new EdParameters(publicParameters, NamedCurves.Curve25519);
-                goto validate;
-            case X448PrivateKeyParameters privateParameters:
-                Parameters = new EdParameters(privateParameters, NamedCurves.Curve448);
-                goto validate;
-            case X448PublicKeyParameters publicParameters:
-                Parameters = new EdParameters(publicParameters, NamedCurves.Curve448);
-                goto validate;
-            case X509Certificate certificate:
-                pem = certificate.GetPublicKey();
-                goto pem;
-        }
-
-        throw new NotSupportedException("Формат файла или его содержимое не соответствует ожидаемым параметрам");
-
-validate:
-        Parameters.Validate();
+            Ed25519PrivateKeyParameters privateParameters => new EdParameters(privateParameters, NamedCurves.Curve25519),
+            Ed25519PublicKeyParameters publicParameters => new EdParameters(publicParameters, NamedCurves.Curve25519),
+            Ed448PrivateKeyParameters privateParameters => new EdParameters(privateParameters, NamedCurves.Curve448),
+            Ed448PublicKeyParameters publicParameters => new EdParameters(publicParameters, NamedCurves.Curve448),
+            X25519PrivateKeyParameters privateParameters => new EdParameters(privateParameters, NamedCurves.Curve25519),
+            X25519PublicKeyParameters publicParameters => new EdParameters(publicParameters, NamedCurves.Curve25519),
+            X448PrivateKeyParameters privateParameters => new EdParameters(privateParameters, NamedCurves.Curve448),
+            X448PublicKeyParameters publicParameters => new EdParameters(publicParameters, NamedCurves.Curve448),
+            _ => throw new NotSupportedException("Формат файла или его содержимое не соответствует ожидаемым параметрам")
+        };
     }
 
     /// <summary>
